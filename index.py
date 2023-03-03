@@ -72,7 +72,7 @@ NOTE:
 """
 class RBM():
     def __init__(self,nv,nh):
-        self.W = torch.randn(nv, nh)
+        self.W = torch.randn(nh, nv)
         self.a = torch.randn(1,nh)
         self.b = torch.randn(1,nv)
         
@@ -113,9 +113,32 @@ for epoch in range(1,nb_epochs+1):
         v0 = train_set[id_user:id_user+batch_size]
         ph0, _ = rbm.sample_h(v0)
         
-        for 
-    
+        for k in range(50):
+            _,hk = rbm.sample_h(vk)
+            _,vk = rbm.sample_v(hk)
+            vk[v0<0] = v0[v0<0]
+        phk, _ = rbm.sample_h(vk)
+        rbm.train(v0, vk, ph0, phk)
+        train_loss += torch.mean(torch.abs(v0[v0>=0]-vk[v0>=0]))
+        s += 1.
+    print('epochs:',str(epoch),'loss:',str(train_loss/s))
 
+
+# Testing
+
+test_loss = 0
+s = 0.
+for id_user in range(nb_users):
+    v = train_set[id_user:id_user+1]
+    vt = test_set[id_user:id_user+1]
+    
+    if len(vt[vt>=0])>0:
+        _,h = rbm.sample_h(v)
+        _,v = rbm.sample_v(h)
+    
+        test_loss += torch.mean(torch.abs(vt[vt>=0]-v[vt>=0]))
+        s += 1.
+print('loss:',str(test_loss/s))
 
 
 
